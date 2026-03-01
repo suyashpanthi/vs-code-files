@@ -1,0 +1,183 @@
+.track {
+  display: flex;
+  height: 80px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+
+.track:hover {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.track.selected {
+  background: rgba(88, 166, 255, 0.04);
+}
+
+.track-header {
+  width: var(--track-header-width);
+  min-width: var(--track-header-width);
+  background: var(--bg-dark);
+  border-right: 1px solid var(--border);
+  border-left: 3px solid;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: sticky;
+  left: 0;
+  z-index: 5;
+}
+
+.track-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.track-name {
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.track-name-input {
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--accent);
+  border-radius: 3px;
+  padding: 1px 4px;
+  outline: none;
+  max-width: 140px;
+}
+
+.track-remove-btn {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: all 0.15s;
+}
+
+.track-header:hover .track-remove-btn {
+  opacity: 1;
+}
+
+.track-remove-btn:hover {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.track-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.track-ctrl-btn {
+  width: 22px;
+  height: 18px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  transition: all 0.15s;
+}
+
+.track-ctrl-btn:hover {
+  background: var(--bg-hover);
+}
+
+.track-ctrl-btn.active-mute {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.track-ctrl-btn.active-solo {
+  background: var(--yellow);
+  color: var(--bg-darkest);
+}
+
+.track-vol-slider {
+  flex: 1;
+  height: 4px;
+  margin-left: 4px;
+}
+
+.track-vol-slider::-webkit-slider-track {
+  height: 4px;
+}
+
+.track-vol-slider::-webkit-slider-thumb {
+  width: 10px;
+  height: 10px;
+  margin-top: -3px;
+}
+
+.track-lane {
+  position: relative;
+  flex: 1;
+  overflow: visible;
+}
+
+.track-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Region */
+.region {
+  position: absolute;
+  top: 2px;
+  height: calc(100% - 4px);
+  border: 1px solid;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: grab;
+  transition: box-shadow 0.15s;
+}
+
+.region:hover {
+  box-shadow: 0 0 8px rgba(88, 166, 255, 0.15);
+}
+
+.region.selected {
+  box-shadow: 0 0 0 1px var(--accent), 0 0 12px rgba(88, 166, 255, 0.2);
+}
+
+.region.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  z-index: 10;
+}
+
+.region-header {
+  height: 16px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+}
+
+.region-name {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.region-canvas {
+  display: block;
+  width: 100%;
+  height: calc(100% - 16px);
+}

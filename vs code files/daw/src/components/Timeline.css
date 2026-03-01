@@ -1,0 +1,119 @@
+.timeline-container {
+  flex: 1;
+  overflow: auto;
+  background: var(--bg-darkest);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-ruler-row {
+  display: flex;
+  height: var(--ruler-height);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg-dark);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.track-header-spacer {
+  width: var(--track-header-width);
+  min-width: var(--track-header-width);
+  background: var(--bg-dark);
+  border-right: 1px solid var(--border);
+}
+
+.timeline-ruler {
+  position: relative;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.ruler-mark {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  pointer-events: none;
+}
+
+.ruler-mark.measure {
+  border-left: 1px solid var(--border-light);
+}
+
+.ruler-mark.beat {
+  border-left: 1px solid var(--border);
+  opacity: 0.4;
+}
+
+.ruler-label {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+}
+
+.timeline-tracks-scroll {
+  flex: 1;
+  position: relative;
+}
+
+.timeline-tracks {
+  position: relative;
+  min-height: 100%;
+}
+
+.timeline-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--text-muted);
+  gap: 8px;
+}
+
+.timeline-empty p {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.timeline-empty-hint {
+  font-size: 12px !important;
+  font-weight: 400 !important;
+  color: var(--text-muted);
+}
+
+.playback-cursor {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  background: var(--red);
+  pointer-events: none;
+  z-index: 20;
+}
+
+.playback-cursor.ruler-cursor {
+  height: 100%;
+}
+
+.playback-cursor.ruler-cursor::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -4px;
+  width: 9px;
+  height: 8px;
+  background: var(--red);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.playback-cursor.track-cursor {
+  height: calc(100%);
+  box-shadow: 0 0 4px rgba(248, 81, 73, 0.4);
+}
