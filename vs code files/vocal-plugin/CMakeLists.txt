@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(ProVocal VERSION 1.0.0)
+project(ProVocal VERSION 2.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -16,7 +16,7 @@ juce_add_plugin(ProVocal
     FORMATS AU VST3 Standalone
     PRODUCT_NAME "ProVocal"
     IS_SYNTH FALSE
-    NEEDS_MIDI_INPUT FALSE
+    NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
     IS_MIDI_EFFECT FALSE
     EDITOR_WANTS_KEYBOARD_FOCUS FALSE
@@ -30,6 +30,24 @@ juce_generate_juce_header(ProVocal)
 target_sources(ProVocal PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
+
+    # DSP modules
+    Source/DSP/PitchDetector.cpp
+    Source/DSP/PitchShifter.cpp
+    Source/DSP/PitchCorrector.cpp
+    Source/DSP/FormantShifter.cpp
+    Source/DSP/GateExpander.cpp
+    Source/DSP/Doubler.cpp
+    Source/DSP/SyncedDelay.cpp
+    Source/DSP/MidiPitchHandler.cpp
+
+    # GUI modules
+    Source/GUI/ProVocalLookAndFeel.cpp
+    Source/GUI/LevelMeter.cpp
+    Source/GUI/PitchDisplayComponent.cpp
+    Source/GUI/ScaleSelector.cpp
+    Source/GUI/PresetBrowser.cpp
+    Source/GUI/TabPanel.cpp
 )
 
 target_compile_definitions(ProVocal PUBLIC

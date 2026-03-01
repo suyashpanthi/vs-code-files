@@ -1,202 +1,366 @@
 #include "PluginEditor.h"
 
-// ============================================================================
-// Custom LookAndFeel
-// ============================================================================
-static const juce::Colour bgColour(0xff1a1a2e);
-static const juce::Colour sectionBg(0xff16213e);
-static const juce::Colour accentColour(0xff0f3460);
-static const juce::Colour knobColour(0xffe94560);
-static const juce::Colour textColour(0xffeaeaea);
-static const juce::Colour dimTextColour(0xff8a8a9a);
-static const juce::Colour meterGreen(0xff00e676);
-static const juce::Colour meterYellow(0xffffc107);
-static const juce::Colour meterRed(0xffff1744);
+using namespace ProVocalColours;
 
-ProVocalLookAndFeel::ProVocalLookAndFeel()
+// ============================================================================
+// Helper: setup a rotary knob
+// ============================================================================
+static void initKnob(juce::Slider& slider, juce::Component* parent)
 {
-    setColour(juce::Slider::rotarySliderFillColourId, knobColour);
-    setColour(juce::Slider::rotarySliderOutlineColourId, accentColour);
-    setColour(juce::Slider::thumbColourId, knobColour);
-    setColour(juce::Label::textColourId, textColour);
+    slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 55, 16);
+    slider.setColour(juce::Slider::textBoxTextColourId, text);
+    slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    parent->addAndMakeVisible(slider);
 }
 
-void ProVocalLookAndFeel::drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height,
-                                            float sliderPos, float rotaryStartAngle,
-                                            float rotaryEndAngle, juce::Slider& slider)
+static void initLabel(juce::Label& label, const juce::String& txt, juce::Component* parent)
 {
-    auto bounds = juce::Rectangle<int>(x, y, width, height).toFloat().reduced(4.0f);
-    auto radius = juce::jmin(bounds.getWidth(), bounds.getHeight()) / 2.0f;
-    auto centreX = bounds.getCentreX();
-    auto centreY = bounds.getCentreY();
-    auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-
-    // Background arc
-    juce::Path bgArc;
-    bgArc.addCentredArc(centreX, centreY, radius - 2.0f, radius - 2.0f,
-                         0.0f, rotaryStartAngle, rotaryEndAngle, true);
-    g.setColour(accentColour);
-    g.strokePath(bgArc, juce::PathStrokeType(3.0f, juce::PathStrokeType::curved,
-                                              juce::PathStrokeType::rounded));
-
-    // Value arc
-    juce::Path valueArc;
-    valueArc.addCentredArc(centreX, centreY, radius - 2.0f, radius - 2.0f,
-                            0.0f, rotaryStartAngle, angle, true);
-    g.setColour(knobColour);
-    g.strokePath(valueArc, juce::PathStrokeType(3.0f, juce::PathStrokeType::curved,
-                                                 juce::PathStrokeType::rounded));
-
-    // Pointer dot
-    auto pointerLength = radius * 0.6f;
-    auto pointerX = centreX + pointerLength * std::cos(angle - juce::MathConstants<float>::halfPi);
-    auto pointerY = centreY + pointerLength * std::sin(angle - juce::MathConstants<float>::halfPi);
-    g.setColour(textColour);
-    g.fillEllipse(pointerX - 3.0f, pointerY - 3.0f, 6.0f, 6.0f);
-
-    // Center circle
-    g.setColour(sectionBg);
-    g.fillEllipse(centreX - radius * 0.4f, centreY - radius * 0.4f,
-                  radius * 0.8f, radius * 0.8f);
-
-    // Value text
-    g.setColour(textColour);
-    g.setFont(10.0f);
-    auto valText = juce::String(slider.getValue(), 1);
-    g.drawText(valText, bounds.toNearestInt(), juce::Justification::centred, false);
+    label.setText(txt, juce::dontSendNotification);
+    label.setFont(juce::Font(juce::FontOptions(12.0f, juce::Font::bold)));
+    label.setColour(juce::Label::textColourId, knob);
+    label.setJustificationType(juce::Justification::centred);
+    parent->addAndMakeVisible(label);
 }
 
-void ProVocalLookAndFeel::drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height,
-                                            float sliderPos, float minSliderPos, float maxSliderPos,
-                                            juce::Slider::SliderStyle style, juce::Slider& slider)
+static void drawSectionBg(juce::Graphics& g, int x, int y, int w, int h, const juce::String& title)
 {
-    if (style == juce::Slider::LinearVertical)
-    {
-        auto trackWidth = 4.0f;
-        auto trackX = (float)x + (float)width * 0.5f - trackWidth * 0.5f;
-
-        // Track background
-        g.setColour(accentColour);
-        g.fillRoundedRectangle(trackX, (float)y, trackWidth, (float)height, 2.0f);
-
-        // Filled portion
-        g.setColour(knobColour);
-        g.fillRoundedRectangle(trackX, sliderPos, trackWidth, (float)(y + height) - sliderPos, 2.0f);
-
-        // Thumb
-        g.setColour(textColour);
-        g.fillRoundedRectangle(trackX - 6.0f, sliderPos - 4.0f, trackWidth + 12.0f, 8.0f, 3.0f);
-    }
-    else
-    {
-        LookAndFeel_V4::drawLinearSlider(g, x, y, width, height, sliderPos,
-                                          minSliderPos, maxSliderPos, style, slider);
-    }
+    g.setColour(sectionBg.withAlpha(0.5f));
+    g.fillRoundedRectangle(static_cast<float>(x), static_cast<float>(y),
+                           static_cast<float>(w), static_cast<float>(h), 6.0f);
+    g.setColour(knob);
+    g.setFont(juce::Font(juce::FontOptions(12.0f, juce::Font::bold)));
+    g.drawText(title, x + 5, y + 3, w - 10, 16, juce::Justification::centredLeft);
 }
 
 // ============================================================================
-// Level Meter
+// PITCH TAB
 // ============================================================================
-LevelMeter::LevelMeter(ProVocalProcessor& p) : processor(p)
+PitchTabContent::PitchTabContent(ProVocalProcessor& p)
+    : pitchDisplay(p.pitchRingBuffer),
+      scaleSelector(p.apvts)
 {
-    startTimerHz(30);
+    addAndMakeVisible(pitchDisplay);
+    addAndMakeVisible(scaleSelector);
+
+    pitchOnButton.setColour(juce::ToggleButton::textColourId, text);
+    pitchOnButton.setColour(juce::ToggleButton::tickColourId, knob);
+    addAndMakeVisible(pitchOnButton);
+    pitchOnAttach = std::make_unique<ButtonAttachment>(p.apvts, ParamIDs::pitchCorrectionOn, pitchOnButton);
+
+    midiModeButton.setColour(juce::ToggleButton::textColourId, text);
+    midiModeButton.setColour(juce::ToggleButton::tickColourId, knob);
+    addAndMakeVisible(midiModeButton);
+    midiModeAttach = std::make_unique<ButtonAttachment>(p.apvts, ParamIDs::pitchMidiMode, midiModeButton);
+
+    setupKnob(retuneSpeedKnob, "Retune");
+    setupKnob(humanizeKnob, "Humanize");
+    setupKnob(vibratoRateKnob, "Vib Rate");
+    setupKnob(vibratoDepthKnob, "Vib Depth");
+    setupKnob(formantShiftKnob, "Formant");
+    setupKnob(bendRangeKnob, "Bend Rng");
+
+    formantPreserveButton.setColour(juce::ToggleButton::textColourId, text);
+    formantPreserveButton.setColour(juce::ToggleButton::tickColourId, knob);
+    addAndMakeVisible(formantPreserveButton);
+    formantPreserveAttach = std::make_unique<ButtonAttachment>(p.apvts, ParamIDs::formantPreserve, formantPreserveButton);
+
+    retuneSpeedAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::pitchRetuneSpeed, retuneSpeedKnob);
+    humanizeAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::pitchHumanize, humanizeKnob);
+    vibratoRateAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::pitchVibratoRate, vibratoRateKnob);
+    vibratoDepthAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::pitchVibratoDepth, vibratoDepthKnob);
+    formantShiftAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::formantShift, formantShiftKnob);
+    bendRangeAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::pitchBendRange, bendRangeKnob);
 }
 
-void LevelMeter::paint(juce::Graphics& g)
+void PitchTabContent::setupKnob(juce::Slider& slider, const juce::String& /*label*/)
 {
-    auto bounds = getLocalBounds().toFloat().reduced(2.0f);
-
-    g.setColour(juce::Colour(0xff0d0d1a));
-    g.fillRoundedRectangle(bounds, 3.0f);
-
-    float meterHeight = bounds.getHeight() * juce::jmin(level, 1.0f);
-    auto meterBounds = bounds.removeFromBottom(meterHeight);
-
-    juce::Colour meterCol = meterGreen;
-    if (level > 0.9f) meterCol = meterRed;
-    else if (level > 0.7f) meterCol = meterYellow;
-
-    g.setColour(meterCol);
-    g.fillRoundedRectangle(meterBounds, 3.0f);
+    initKnob(slider, this);
 }
 
-void LevelMeter::timerCallback()
+void PitchTabContent::paint(juce::Graphics& g)
 {
-    float newLevel = processor.getCurrentOutputLevel();
-    level = level * 0.85f + newLevel * 0.15f; // smooth
-    repaint();
+    g.fillAll(bg);
+    drawSectionBg(g, 5, 310, getWidth() - 10, 85, "CORRECTION");
+    drawSectionBg(g, 5, 400, 340, 85, "VIBRATO & FORMANT");
+    drawSectionBg(g, 350, 400, 250, 85, "MIDI");
+}
+
+void PitchTabContent::resized()
+{
+    int knobSize = 60;
+
+    // Pitch display at top
+    pitchDisplay.setBounds(5, 5, getWidth() - 10, 220);
+
+    // Scale selector below
+    scaleSelector.setBounds(5, 230, getWidth() - 10, 75);
+
+    // Correction section
+    int corrY = 328;
+    pitchOnButton.setBounds(10, corrY, 80, 22);
+    retuneSpeedKnob.setBounds(100, corrY, knobSize, knobSize);
+    humanizeKnob.setBounds(170, corrY, knobSize, knobSize);
+
+    // Vibrato & Formant
+    int vfY = 418;
+    vibratoRateKnob.setBounds(10, vfY, knobSize, knobSize);
+    vibratoDepthKnob.setBounds(80, vfY, knobSize, knobSize);
+    formantShiftKnob.setBounds(160, vfY, knobSize, knobSize);
+    formantPreserveButton.setBounds(230, vfY, 100, 22);
+
+    // MIDI section
+    int midiY = 418;
+    midiModeButton.setBounds(355, midiY, 100, 22);
+    bendRangeKnob.setBounds(460, midiY, knobSize, knobSize);
 }
 
 // ============================================================================
-// Editor
+// DYNAMICS TAB
 // ============================================================================
-ProVocalEditor::ProVocalEditor(ProVocalProcessor& p)
-    : AudioProcessorEditor(&p), processorRef(p), levelMeter(p)
+DynamicsTabContent::DynamicsTabContent(ProVocalProcessor& p)
 {
-    setLookAndFeel(&customLookAndFeel);
-    setSize(700, 500);
-
-    // Setup all knobs
+    setupKnob(inputGainKnob);
+    setupKnob(gateThreshKnob); setupKnob(gateRatioKnob);
+    setupKnob(gateAttackKnob); setupKnob(gateReleaseKnob);
     setupKnob(hpfFreqKnob);
+    setupKnob(compThreshKnob); setupKnob(compRatioKnob);
+    setupKnob(compAttackKnob); setupKnob(compReleaseKnob); setupKnob(compMakeupKnob);
+    setupKnob(deEssThreshKnob); setupKnob(deEssFreqKnob);
 
-    setupKnob(compThreshKnob);
-    setupKnob(compRatioKnob);
-    setupKnob(compAttackKnob);
-    setupKnob(compReleaseKnob);
-    setupKnob(compMakeupKnob);
+    inputGainAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::inputGain, inputGainKnob);
+    gateThreshAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::gateThresh, gateThreshKnob);
+    gateRatioAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::gateRatio, gateRatioKnob);
+    gateAttackAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::gateAttack, gateAttackKnob);
+    gateReleaseAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::gateRelease, gateReleaseKnob);
+    hpfFreqAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::hpfFreq, hpfFreqKnob);
+    compThreshAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::compThresh, compThreshKnob);
+    compRatioAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::compRatio, compRatioKnob);
+    compAttackAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::compAttack, compAttackKnob);
+    compReleaseAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::compRelease, compReleaseKnob);
+    compMakeupAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::compMakeup, compMakeupKnob);
+    deEssThreshAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::deEssThresh, deEssThreshKnob);
+    deEssFreqAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::deEssFreq, deEssFreqKnob);
 
-    setupKnob(eqLowGainKnob);
-    setupKnob(eqMidGainKnob);
-    setupKnob(eqMidFreqKnob);
+    initLabel(inputLabel, "INPUT", this);
+    initLabel(gateLabel, "GATE", this);
+    initLabel(hpfLabel, "HPF", this);
+    initLabel(compLabel, "COMPRESSOR", this);
+    initLabel(deEssLabel, "DE-ESSER", this);
+}
+
+void DynamicsTabContent::setupKnob(juce::Slider& slider)
+{
+    initKnob(slider, this);
+}
+
+void DynamicsTabContent::paint(juce::Graphics& g)
+{
+    g.fillAll(bg);
+    drawSectionBg(g, 5, 5, 80, 240, "INPUT");
+    drawSectionBg(g, 90, 5, 260, 240, "GATE");
+    drawSectionBg(g, 355, 5, 80, 240, "HPF");
+    drawSectionBg(g, 5, 255, 350, 240, "COMPRESSOR");
+    drawSectionBg(g, 360, 255, 180, 240, "DE-ESSER");
+}
+
+void DynamicsTabContent::resized()
+{
+    int knobSize = 60;
+    int row1Y = 30;
+    int row2Y = row1Y + knobSize + 20;
+
+    // Input section
+    inputGainKnob.setBounds(15, row1Y, knobSize, knobSize);
+
+    // Gate section
+    gateThreshKnob.setBounds(100, row1Y, knobSize, knobSize);
+    gateRatioKnob.setBounds(170, row1Y, knobSize, knobSize);
+    gateAttackKnob.setBounds(240, row1Y, knobSize, knobSize);
+    gateReleaseKnob.setBounds(100, row2Y, knobSize, knobSize);
+
+    // HPF
+    hpfFreqKnob.setBounds(365, row1Y, knobSize, knobSize);
+
+    // Compressor section
+    int compY = 280;
+    compThreshKnob.setBounds(15, compY, knobSize, knobSize);
+    compRatioKnob.setBounds(85, compY, knobSize, knobSize);
+    compAttackKnob.setBounds(155, compY, knobSize, knobSize);
+    compReleaseKnob.setBounds(225, compY, knobSize, knobSize);
+    compMakeupKnob.setBounds(15, compY + knobSize + 15, knobSize, knobSize);
+
+    // De-Esser section
+    deEssThreshKnob.setBounds(370, compY, knobSize, knobSize);
+    deEssFreqKnob.setBounds(370, compY + knobSize + 15, knobSize, knobSize);
+}
+
+// ============================================================================
+// TONE TAB
+// ============================================================================
+ToneTabContent::ToneTabContent(ProVocalProcessor& p)
+{
+    setupKnob(eqLowGainKnob); setupKnob(eqMidGainKnob); setupKnob(eqMidFreqKnob);
+    setupKnob(eqMid2GainKnob); setupKnob(eqMid2FreqKnob);
     setupKnob(eqHighGainKnob);
-
-    setupKnob(deEssThreshKnob);
-    setupKnob(deEssFreqKnob);
-
     setupKnob(satDriveKnob);
 
-    setupKnob(reverbMixKnob);
-    setupKnob(reverbSizeKnob);
+    eqLowGainAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqLowGain, eqLowGainKnob);
+    eqMidGainAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqMidGain, eqMidGainKnob);
+    eqMidFreqAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqMidFreq, eqMidFreqKnob);
+    eqMid2GainAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqMid2Gain, eqMid2GainKnob);
+    eqMid2FreqAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqMid2Freq, eqMid2FreqKnob);
+    eqHighGainAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::eqHighGain, eqHighGainKnob);
+    satDriveAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::satDrive, satDriveKnob);
 
-    // Output gain as vertical slider
+    initLabel(eqLabel, "4-BAND EQ", this);
+    initLabel(satLabel, "SATURATION", this);
+}
+
+void ToneTabContent::setupKnob(juce::Slider& slider)
+{
+    initKnob(slider, this);
+}
+
+void ToneTabContent::paint(juce::Graphics& g)
+{
+    g.fillAll(bg);
+    drawSectionBg(g, 5, 5, 500, 280, "4-BAND EQ");
+    drawSectionBg(g, 5, 295, 120, 190, "SATURATION");
+}
+
+void ToneTabContent::resized()
+{
+    int knobSize = 65;
+    int row1Y = 35;
+    int row2Y = row1Y + knobSize + 30;
+
+    // EQ row 1: Low Shelf, Mid1 Gain, Mid1 Freq
+    eqLowGainKnob.setBounds(20, row1Y, knobSize, knobSize);
+    eqMidGainKnob.setBounds(100, row1Y, knobSize, knobSize);
+    eqMidFreqKnob.setBounds(180, row1Y, knobSize, knobSize);
+
+    // EQ row 2: Mid2 Gain, Mid2 Freq, High Shelf
+    eqMid2GainKnob.setBounds(20, row2Y, knobSize, knobSize);
+    eqMid2FreqKnob.setBounds(100, row2Y, knobSize, knobSize);
+    eqHighGainKnob.setBounds(180, row2Y, knobSize, knobSize);
+
+    // Saturation
+    satDriveKnob.setBounds(20, 325, knobSize, knobSize);
+}
+
+// ============================================================================
+// FX TAB
+// ============================================================================
+FXTabContent::FXTabContent(ProVocalProcessor& p)
+{
+    setupKnob(doublerMixKnob); setupKnob(doublerDetuneKnob);
+    setupKnob(doublerDelayKnob); setupKnob(doublerWidthKnob);
+    setupKnob(delayMixKnob); setupKnob(delayTimeKnob);
+    setupKnob(delayFeedbackKnob); setupKnob(delayFilterKnob);
+    setupKnob(delaySyncDivKnob);
+    setupKnob(reverbMixKnob); setupKnob(reverbSizeKnob);
+
+    delaySyncButton.setColour(juce::ToggleButton::textColourId, text);
+    delaySyncButton.setColour(juce::ToggleButton::tickColourId, knob);
+    addAndMakeVisible(delaySyncButton);
+
+    doublerMixAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::doublerMix, doublerMixKnob);
+    doublerDetuneAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::doublerDetune, doublerDetuneKnob);
+    doublerDelayAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::doublerDelay, doublerDelayKnob);
+    doublerWidthAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::doublerWidth, doublerWidthKnob);
+    delayMixAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::delayMix, delayMixKnob);
+    delayTimeAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::delayTime, delayTimeKnob);
+    delayFeedbackAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::delayFeedback, delayFeedbackKnob);
+    delayFilterAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::delayFilterFreq, delayFilterKnob);
+    delaySyncAttach = std::make_unique<ButtonAttachment>(p.apvts, ParamIDs::delaySync, delaySyncButton);
+    delaySyncDivAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::delaySyncDiv, delaySyncDivKnob);
+    reverbMixAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::reverbMix, reverbMixKnob);
+    reverbSizeAttach = std::make_unique<SliderAttachment>(p.apvts, ParamIDs::reverbSize, reverbSizeKnob);
+
+    initLabel(doublerLabel, "DOUBLER", this);
+    initLabel(delayLabel, "DELAY", this);
+    initLabel(reverbLabel, "REVERB", this);
+}
+
+void FXTabContent::setupKnob(juce::Slider& slider)
+{
+    initKnob(slider, this);
+}
+
+void FXTabContent::paint(juce::Graphics& g)
+{
+    g.fillAll(bg);
+    drawSectionBg(g, 5, 5, 320, 240, "DOUBLER");
+    drawSectionBg(g, 330, 5, 360, 240, "DELAY");
+    drawSectionBg(g, 5, 255, 200, 230, "REVERB");
+}
+
+void FXTabContent::resized()
+{
+    int knobSize = 60;
+    int row1Y = 30;
+    int row2Y = row1Y + knobSize + 20;
+
+    // Doubler section
+    doublerMixKnob.setBounds(15, row1Y, knobSize, knobSize);
+    doublerDetuneKnob.setBounds(85, row1Y, knobSize, knobSize);
+    doublerDelayKnob.setBounds(155, row1Y, knobSize, knobSize);
+    doublerWidthKnob.setBounds(225, row1Y, knobSize, knobSize);
+
+    // Delay section
+    delayMixKnob.setBounds(340, row1Y, knobSize, knobSize);
+    delayTimeKnob.setBounds(410, row1Y, knobSize, knobSize);
+    delayFeedbackKnob.setBounds(480, row1Y, knobSize, knobSize);
+    delayFilterKnob.setBounds(550, row1Y, knobSize, knobSize);
+    delaySyncButton.setBounds(340, row2Y, 80, 22);
+    delaySyncDivKnob.setBounds(430, row2Y, knobSize, knobSize);
+
+    // Reverb section
+    reverbMixKnob.setBounds(15, 280, knobSize, knobSize);
+    reverbSizeKnob.setBounds(85, 280, knobSize, knobSize);
+}
+
+// ============================================================================
+// MAIN EDITOR
+// ============================================================================
+ProVocalEditor::ProVocalEditor(ProVocalProcessor& p)
+    : AudioProcessorEditor(&p),
+      processorRef(p),
+      presetBrowser(p.apvts),
+      pitchTab(p),
+      dynamicsTab(p),
+      toneTab(p),
+      fxTab(p),
+      levelMeter(p)
+{
+    setLookAndFeel(&customLookAndFeel);
+    setSize(1100, 700);
+
+    // Preset browser in header
+    addAndMakeVisible(presetBrowser);
+
+    // Tab panel
+    tabPanel.addTab("PITCH", &pitchTab);
+    tabPanel.addTab("DYNAMICS", &dynamicsTab);
+    tabPanel.addTab("TONE", &toneTab);
+    tabPanel.addTab("FX", &fxTab);
+    addAndMakeVisible(tabPanel);
+
+    // Output section (persistent, right side)
     outputGainSlider.setSliderStyle(juce::Slider::LinearVertical);
-    outputGainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 50, 18);
-    outputGainSlider.setColour(juce::Slider::textBoxTextColourId, textColour);
+    outputGainSlider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 40, 18);
+    outputGainSlider.setColour(juce::Slider::textBoxTextColourId, text);
     outputGainSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(outputGainSlider);
 
-    // Attach all parameters
-    hpfFreqAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "hpfFreq", hpfFreqKnob);
+    outputGainAttach = std::make_unique<SliderAttachment>(processorRef.apvts, ParamIDs::outputGain, outputGainSlider);
 
-    compThreshAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "compThresh", compThreshKnob);
-    compRatioAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "compRatio", compRatioKnob);
-    compAttackAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "compAttack", compAttackKnob);
-    compReleaseAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "compRelease", compReleaseKnob);
-    compMakeupAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "compMakeup", compMakeupKnob);
-
-    eqLowGainAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "eqLowGain", eqLowGainKnob);
-    eqMidGainAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "eqMidGain", eqMidGainKnob);
-    eqMidFreqAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "eqMidFreq", eqMidFreqKnob);
-    eqHighGainAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "eqHighGain", eqHighGainKnob);
-
-    deEssThreshAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "deEssThresh", deEssThreshKnob);
-    deEssFreqAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "deEssFreq", deEssFreqKnob);
-
-    satDriveAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "satDrive", satDriveKnob);
-
-    reverbMixAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "reverbMix", reverbMixKnob);
-    reverbSizeAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "reverbSize", reverbSizeKnob);
-
-    outputGainAttach = std::make_unique<SliderAttachment>(processorRef.apvts, "outputGain", outputGainSlider);
-
-    // Section labels
-    setupLabel(hpfLabel, "HPF");
-    setupLabel(compLabel, "COMPRESSOR");
-    setupLabel(eqLabel, "EQ");
-    setupLabel(deEssLabel, "DE-ESSER");
-    setupLabel(satLabel, "SATURATE");
-    setupLabel(reverbLabel, "REVERB");
-    setupLabel(outputLabel, "OUTPUT");
+    outputLabel.setText("OUT", juce::dontSendNotification);
+    outputLabel.setFont(juce::Font(juce::FontOptions(11.0f, juce::Font::bold)));
+    outputLabel.setColour(juce::Label::textColourId, knob);
+    outputLabel.setJustificationType(juce::Justification::centred);
+    addAndMakeVisible(outputLabel);
 
     addAndMakeVisible(levelMeter);
 }
@@ -206,100 +370,41 @@ ProVocalEditor::~ProVocalEditor()
     setLookAndFeel(nullptr);
 }
 
-void ProVocalEditor::setupKnob(juce::Slider& slider)
-{
-    slider.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-    slider.setTextBoxStyle(juce::Slider::TextBoxBelow, false, 55, 16);
-    slider.setColour(juce::Slider::textBoxTextColourId, textColour);
-    slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
-    addAndMakeVisible(slider);
-}
-
-void ProVocalEditor::setupLabel(juce::Label& label, const juce::String& text)
-{
-    label.setText(text, juce::dontSendNotification);
-    label.setFont(juce::Font(juce::FontOptions(12.0f, juce::Font::bold)));
-    label.setColour(juce::Label::textColourId, knobColour);
-    label.setJustificationType(juce::Justification::centred);
-    addAndMakeVisible(label);
-}
-
 void ProVocalEditor::paint(juce::Graphics& g)
 {
     // Background
-    g.fillAll(bgColour);
+    g.fillAll(bg);
 
-    // Title bar
+    // Header bar
     g.setColour(sectionBg);
     g.fillRect(0, 0, getWidth(), 40);
-    g.setColour(textColour);
+    g.setColour(text);
     g.setFont(juce::Font(juce::FontOptions(20.0f, juce::Font::bold)));
-    g.drawText("ProVocal", 15, 5, 200, 30, juce::Justification::centredLeft);
-    g.setColour(dimTextColour);
-    g.setFont(12.0f);
-    g.drawText("Professional Vocal Chain", 150, 10, 200, 20, juce::Justification::centredLeft);
+    g.drawText("ProVocal", 15, 5, 120, 30, juce::Justification::centredLeft);
+    g.setColour(dimText);
+    g.setFont(11.0f);
+    g.drawText("v2.0", 135, 12, 40, 16, juce::Justification::centredLeft);
 
-    // Section backgrounds
-    auto drawSection = [&](int x, int w)
-    {
-        g.setColour(sectionBg.withAlpha(0.5f));
-        g.fillRoundedRectangle((float)x, 50.0f, (float)w, 440.0f, 6.0f);
-    };
-
-    // Section widths: HPF(65), COMP(175), EQ(155), DEESS(90), SAT(65), REVERB(90), OUTPUT(55)
-    drawSection(5, 65);
-    drawSection(75, 175);
-    drawSection(255, 155);
-    drawSection(415, 90);
-    drawSection(510, 65);
-    drawSection(580, 90);
-    drawSection(675, 25);
+    // Output section background
+    int outX = getWidth() - 50;
+    g.setColour(sectionBg.withAlpha(0.5f));
+    g.fillRoundedRectangle(static_cast<float>(outX), 70.0f, 45.0f, 620.0f, 6.0f);
 }
 
 void ProVocalEditor::resized()
 {
-    int knobSize = 55;
-    int labelH = 20;
-    int topY = 55;
-    int row1Y = topY + labelH + 5;
-    int row2Y = row1Y + knobSize + 10;
+    int outSectionW = 50;
+    int headerH = 40;
 
+    // Preset browser in header
+    presetBrowser.setBounds(250, 7, getWidth() - 310, 26);
 
-    // HPF section (x=5, w=65)
-    hpfLabel.setBounds(5, topY, 65, labelH);
-    hpfFreqKnob.setBounds(10, row1Y, knobSize, knobSize);
+    // Tab panel takes up main area
+    tabPanel.setBounds(0, headerH, getWidth() - outSectionW, getHeight() - headerH);
 
-    // Compressor section (x=75, w=175)
-    compLabel.setBounds(75, topY, 175, labelH);
-    compThreshKnob.setBounds(80, row1Y, knobSize, knobSize);
-    compRatioKnob.setBounds(140, row1Y, knobSize, knobSize);
-    compAttackKnob.setBounds(200, row1Y, knobSize, knobSize);
-    compReleaseKnob.setBounds(80, row2Y, knobSize, knobSize);
-    compMakeupKnob.setBounds(140, row2Y, knobSize, knobSize);
-
-    // EQ section (x=255, w=155)
-    eqLabel.setBounds(255, topY, 155, labelH);
-    eqLowGainKnob.setBounds(260, row1Y, knobSize, knobSize);
-    eqMidGainKnob.setBounds(320, row1Y, knobSize, knobSize);
-    eqMidFreqKnob.setBounds(260, row2Y, knobSize, knobSize);
-    eqHighGainKnob.setBounds(320, row2Y, knobSize, knobSize);
-
-    // De-Esser section (x=415, w=90)
-    deEssLabel.setBounds(415, topY, 90, labelH);
-    deEssThreshKnob.setBounds(420, row1Y, knobSize, knobSize);
-    deEssFreqKnob.setBounds(420, row2Y, knobSize, knobSize);
-
-    // Saturation section (x=510, w=65)
-    satLabel.setBounds(510, topY, 65, labelH);
-    satDriveKnob.setBounds(515, row1Y, knobSize, knobSize);
-
-    // Reverb section (x=580, w=90)
-    reverbLabel.setBounds(580, topY, 90, labelH);
-    reverbMixKnob.setBounds(585, row1Y, knobSize, knobSize);
-    reverbSizeKnob.setBounds(585, row2Y, knobSize, knobSize);
-
-    // Output section (far right)
-    outputLabel.setBounds(650, topY, 45, labelH);
-    outputGainSlider.setBounds(655, row1Y, 30, knobSize * 3);
-    levelMeter.setBounds(688, row1Y, 8, knobSize * 3);
+    // Output section (right side, persistent)
+    int outX = getWidth() - outSectionW;
+    outputLabel.setBounds(outX, headerH + 5, outSectionW, 18);
+    outputGainSlider.setBounds(outX + 5, headerH + 28, 30, getHeight() - headerH - 80);
+    levelMeter.setBounds(outX + 37, headerH + 28, 10, getHeight() - headerH - 80);
 }
