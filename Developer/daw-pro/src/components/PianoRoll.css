@@ -1,0 +1,301 @@
+/* ===== Piano Roll ===== */
+.piano-roll {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px;
+  user-select: none;
+  overflow: hidden;
+}
+
+.piano-roll-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #1a1a2e;
+  color: #666;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 13px;
+}
+
+.piano-roll-empty-text {
+  opacity: 0.6;
+}
+
+/* ===== Toolbar ===== */
+.piano-roll-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 30px;
+  min-height: 30px;
+  padding: 0 8px;
+  background-color: #0d1426;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 4px;
+}
+
+.pr-toolbar-left,
+.pr-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pr-clip-name {
+  color: #a0c4ff;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 3px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pr-toolbar-sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 2px;
+}
+
+.pr-tool-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #aaa;
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0;
+  transition: all 0.1s ease;
+}
+
+.pr-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.pr-tool-btn.active {
+  background: rgba(52, 152, 219, 0.3);
+  color: #5dade2;
+  border-color: #3498db;
+}
+
+.pr-toolbar-label {
+  color: #888;
+  font-size: 10px;
+}
+
+.pr-grid-select {
+  height: 20px;
+  background: #0d1426;
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 3px;
+  font-size: 10px;
+  padding: 0 4px;
+  cursor: pointer;
+  outline: none;
+}
+
+.pr-grid-select:focus {
+  border-color: #3498db;
+}
+
+.pr-note-count {
+  color: #666;
+  font-size: 10px;
+}
+
+/* ===== Body Layout ===== */
+.piano-roll-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* ===== Piano Keyboard ===== */
+.piano-keyboard {
+  width: 60px;
+  min-width: 60px;
+  overflow: hidden;
+  position: relative;
+  background-color: #111;
+  border-right: 2px solid #333;
+  z-index: 5;
+}
+
+.piano-keys-inner {
+  position: relative;
+}
+
+.piano-key {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 4px;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background-color 0.05s;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+.piano-key.white {
+  background-color: #e8e8e8;
+  z-index: 1;
+}
+
+.piano-key.white:hover {
+  background-color: #d4d4f8;
+}
+
+.piano-key.white:active {
+  background-color: #b8b8e8;
+}
+
+.piano-key.black {
+  background-color: #2d2d2d;
+  width: 65%;
+  z-index: 2;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.piano-key.black:hover {
+  background-color: #444466;
+}
+
+.piano-key.black:active {
+  background-color: #555580;
+}
+
+.piano-key.c-note {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.6);
+}
+
+.piano-key-label {
+  font-size: 8px;
+  font-weight: 600;
+  color: #444;
+  pointer-events: none;
+}
+
+.piano-key.black .piano-key-label {
+  color: #aaa;
+}
+
+/* ===== Grid Column ===== */
+.piano-roll-grid-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Beat Header ===== */
+.pr-beat-header {
+  height: 24px;
+  min-height: 24px;
+  position: relative;
+  background-color: #0d1426;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.pr-beat-number {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  color: #777;
+  font-size: 9px;
+  font-weight: 500;
+  padding-left: 4px;
+  pointer-events: none;
+}
+
+/* ===== Note Grid ===== */
+.piano-roll-grid {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.pr-grid-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Velocity Section ===== */
+.pr-velocity-header {
+  height: 16px;
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+  padding-left: 6px;
+  background-color: #0d0d1a;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.pr-velocity-label {
+  font-size: 9px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.piano-roll-velocity {
+  height: 80px;
+  min-height: 80px;
+  position: relative;
+  background-color: #0d0d1a;
+  cursor: ns-resize;
+}
+
+.pr-velocity-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ===== Scrollbar styling ===== */
+.piano-roll ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.piano-roll ::-webkit-scrollbar-track {
+  background: #0a0a14;
+}
+
+.piano-roll ::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.piano-roll ::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

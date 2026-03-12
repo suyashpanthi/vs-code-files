@@ -1,0 +1,450 @@
+/* ===== Mixer View ===== */
+.mixer-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #0d1426;
+  color: #e0e0e0;
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  font-size: 11px;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ===== Mixer Header ===== */
+.mixer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 26px;
+  min-height: 26px;
+  padding: 0 10px;
+  background-color: #0a0e1a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.mixer-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mixer-track-count {
+  font-size: 10px;
+  color: #555;
+}
+
+/* ===== Strips Container ===== */
+.mixer-strips-container {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.mixer-strips {
+  display: flex;
+  height: 100%;
+  min-width: min-content;
+}
+
+/* ===== Separator ===== */
+.mixer-separator {
+  width: 2px;
+  min-width: 2px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  margin: 8px 2px;
+}
+
+.mixer-separator.master-sep {
+  width: 3px;
+  min-width: 3px;
+  background: linear-gradient(to bottom, rgba(255, 153, 0, 0.3), rgba(255, 153, 0, 0.05));
+}
+
+/* ===== Channel Strip ===== */
+.channel-strip {
+  display: flex;
+  flex-direction: column;
+  width: 72px;
+  min-width: 72px;
+  background-color: #16213e;
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  padding: 0;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.channel-strip:hover {
+  background-color: #1a2748;
+}
+
+.channel-strip.selected {
+  background-color: #1e2d52;
+  box-shadow: inset 0 0 0 1px rgba(52, 152, 219, 0.3);
+}
+
+.channel-strip.master {
+  width: 88px;
+  min-width: 88px;
+  background-color: #1a1a30;
+  border-left: 1px solid rgba(255, 153, 0, 0.2);
+}
+
+.channel-strip.master:hover {
+  background-color: #1e1e3a;
+}
+
+.channel-strip.return {
+  background-color: #141e36;
+}
+
+/* ===== Color Indicator ===== */
+.strip-color {
+  height: 3px;
+  min-height: 3px;
+  width: 100%;
+}
+
+/* ===== Track Name ===== */
+.strip-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 4px 2px;
+  min-height: 24px;
+}
+
+.strip-name-text {
+  font-size: 10px;
+  font-weight: 500;
+  color: #ccc;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+.strip-name-input {
+  width: 100%;
+  background: #0d1426;
+  border: 1px solid #3498db;
+  border-radius: 2px;
+  color: #fff;
+  font-size: 10px;
+  text-align: center;
+  padding: 1px 2px;
+  outline: none;
+}
+
+/* ===== I/O Label ===== */
+.strip-io {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 4px;
+  min-height: 16px;
+}
+
+.io-label {
+  font-size: 8px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* ===== Device Count ===== */
+.strip-devices {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  min-height: 18px;
+}
+
+.device-count {
+  font-size: 8px;
+  color: #555;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1px 4px;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+/* ===== Send Knobs ===== */
+.strip-sends {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 4px;
+  min-height: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.send-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  width: 100%;
+  justify-content: center;
+}
+
+.send-label {
+  font-size: 8px;
+  color: #555;
+  width: 10px;
+  text-align: right;
+}
+
+/* ===== Pan Knob ===== */
+.strip-pan {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 0 2px;
+  min-height: 40px;
+}
+
+/* ===== Rotary Knob ===== */
+.rotary-knob-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.rotary-knob {
+  cursor: ns-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rotary-knob:hover circle {
+  stroke: rgba(255, 255, 255, 0.25);
+}
+
+.knob-label {
+  font-size: 8px;
+  color: #555;
+  text-align: center;
+}
+
+/* ===== Meter + Fader Area ===== */
+.strip-meter-fader {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  padding: 4px 6px;
+  min-height: 140px;
+}
+
+/* ===== Level Meter ===== */
+.level-meter {
+  width: 16px;
+  min-width: 16px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: #0a0a14;
+}
+
+.level-meter canvas {
+  display: block;
+}
+
+/* ===== Volume Fader ===== */
+.volume-fader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 28px;
+  gap: 3px;
+}
+
+.fader-track {
+  flex: 1;
+  width: 8px;
+  background: #0a0a1a;
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.fader-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(to top, rgba(52, 152, 219, 0.3), rgba(52, 152, 219, 0.15));
+  border-radius: 0 0 4px 4px;
+  pointer-events: none;
+}
+
+.fader-thumb {
+  position: absolute;
+  left: -6px;
+  width: 20px;
+  height: 12px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, #f0f0f0, #c0c0c0, #e0e0e0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  cursor: ns-resize;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.fader-thumb::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 3px;
+  right: 3px;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.fader-thumb:hover {
+  background: linear-gradient(to bottom, #fff, #d0d0d0, #f0f0f0);
+}
+
+.fader-scale {
+  position: absolute;
+  right: -20px;
+  top: 0;
+  bottom: 0;
+  width: 20px;
+  pointer-events: none;
+}
+
+.fader-scale-mark {
+  position: absolute;
+  right: 0;
+  font-size: 7px;
+  color: #444;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.fader-value {
+  font-size: 8px;
+  color: #888;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ===== Strip Buttons ===== */
+.strip-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 4px;
+  min-height: 28px;
+}
+
+.strip-btn {
+  width: 18px;
+  height: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #666;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.1s ease;
+}
+
+.strip-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #aaa;
+}
+
+/* Solo button */
+.solo-btn.active {
+  background: rgba(255, 215, 0, 0.2);
+  color: #ffd700;
+  border-color: #ffd700;
+  box-shadow: 0 0 4px rgba(255, 215, 0, 0.3);
+}
+
+/* Mute button */
+.mute-btn.active {
+  background: rgba(255, 107, 0, 0.2);
+  color: #ff6b00;
+  border-color: #ff6b00;
+  box-shadow: 0 0 4px rgba(255, 107, 0, 0.3);
+}
+
+/* Arm button */
+.arm-btn {
+  position: relative;
+}
+
+.arm-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #555;
+  display: block;
+}
+
+.arm-btn.active {
+  background: rgba(255, 51, 51, 0.2);
+  border-color: #ff3333;
+  box-shadow: 0 0 4px rgba(255, 51, 51, 0.3);
+}
+
+.arm-btn.active .arm-dot {
+  background: #ff3333;
+  box-shadow: 0 0 4px rgba(255, 51, 51, 0.5);
+  animation: arm-pulse 1.2s infinite ease-in-out;
+}
+
+@keyframes arm-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ===== Track Number ===== */
+.strip-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  min-height: 20px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #444;
+  background: rgba(0, 0, 0, 0.15);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* ===== Scrollbar ===== */
+.mixer-strips-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.mixer-strips-container::-webkit-scrollbar-track {
+  background: #0a0a14;
+}
+
+.mixer-strips-container::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+
+.mixer-strips-container::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
